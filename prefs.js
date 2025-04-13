@@ -41,19 +41,16 @@ export default class WorkspaceOverlayPreferences extends ExtensionPreferences {
                 subtitle: `Shortcut to overlay workspace ${i} windows`,
             });
 
-            const entry = new Gtk.Entry({
-                hexpand: false,
-                width_request: 200
+            const entry = new Gtk.ShortcutsShortcut({
+                accelerator: settings.get_strv(`overlay-workspace-${i}`)[0] || ""
             });
 
-            settings.bind(
-                `overlay-workspace-${i}`,
-                entry,
-                'text',
-                Gio.SettingsBindFlags.DEFAULT
-            );
+            entry.connect('notify::accelerator', (widget) => {
+                settings.set_strv(`overlay-workspace-${i}`, [widget.accelerator]);
+            });
 
             row.add_suffix(entry);
+            row.set_activatable_widget(entry);
             box.append(row);
         }
 
