@@ -5,10 +5,19 @@ import Shell from 'gi://Shell';
 
 export default class WorkspaceOverlayExtension extends Extension {
     enable() {
-        this._workspaceOverlays = [
-            { sourceWorkspaceIndex: 2, sourceWorkspaceNumber: 3, comment: 'communication' },
-            { sourceWorkspaceIndex: 3, sourceWorkspaceNumber: 4, comment: 'dashboard' },
-        ];
+        // Initialize _workspaces with all workspaces
+        this._workspaces = [];
+        const workspaceCount = global.workspace_manager.get_n_workspaces();
+        
+        // Populate all workspaces first
+        for (let i = 0; i < workspaceCount; i++) {
+            this._workspaces.push({
+                sourceWorkspaceIndex: i,
+                sourceWorkspaceNumber: i + 1,  // 1-based for display
+                comment: i === 2 ? 'communication' : (i === 3 ? 'dashboard' : ''),
+                isOverlay: false  // All workspaces start as non-overlay
+            });
+        }
 
         this._workspaceHandlerId = global.workspace_manager.connect(
             'workspace-switched',
@@ -72,6 +81,13 @@ export default class WorkspaceOverlayExtension extends Extension {
                     // Get windows from workspace i
                     // Note: Workspace numbers are 1-based, but indexes are 0-based
                     const workspaceIndex = i - 1;
+                    
+                    // Set this workspace as an overlay
+                    if (workspaceIndex < this._workspaces.length) {
+                        this._workspaces[workspaceIndex].isOverlay = true;
+                        log(`Set workspace ${i} (index ${workspaceIndex}) as overlay`);
+                    }
+                    
                     const windows = this.getWindowsOfWorkspace(workspaceIndex);
                     log(`Found ${windows.length} windows in workspace ${i} (index ${workspaceIndex})`);
                     // Logic to overlay windows from workspace i
