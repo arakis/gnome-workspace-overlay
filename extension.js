@@ -118,8 +118,24 @@ export default class WorkspaceOverlayExtension extends Extension {
             const overlayWindows = this.getWindowsOfWorkspace(workspaceIndex);
             workspaceEntry.overlayWindows = overlayWindows;
             
-            // Store original workspace information for each window
-            // (We'll implement the actual window manipulation later)
+            // Make the windows stick to all workspaces
+            overlayWindows.forEach(window => {
+                // Skip windows that are already on all workspaces
+                if (window.is_on_all_workspaces())
+                    return;
+
+                // Store original workspace information for each window
+                window._originalWorkspaceIndex = workspaceIndex;
+                window._wasSticky = window.is_on_all_workspaces();
+                
+                // Make windows appear on all workspaces
+                window.stick();
+                
+                // Optional: Change opacity or add a border to indicate overlay status
+                // window.opacity = 220; // 85% opacity
+            });
+            
+            log(`Made ${overlayWindows.length} windows from workspace ${workspaceIndex} visible across all workspaces`);
         }
     }
     
@@ -137,7 +153,35 @@ export default class WorkspaceOverlayExtension extends Extension {
                 workspaceEntry.isOverlay = false;
                 
                 // Return windows to their original workspace
-                // (We'll implement the actual window manipulation later)
+                const overlayWindows = workspaceEntry.overlayWindows || [];
+                
+                overlayWindows.forEach(window => {
+                    // Skip invalid windows
+                    if (!window || !window.get_workspace) 
+                        return;
+                    
+                    if (window._wasSticky === undefined || window._wasSticky === false) {
+                        // If window wasn't originally sticky, unstick it
+                        window.unstick();
+                        
+                        // Move it back to its original workspace
+                        if (window._originalWorkspaceIndex !== undefined) {
+                            const targetWorkspace = global.workspace_manager.get_workspace_by_index(
+                                window._originalWorkspaceIndex
+                            );
+                            if (targetWorkspace) {
+                                window.change_workspace(targetWorkspace);
+                            }
+                        }
+                    }
+                    
+                    // Optional: Restore original opacity if changed
+                    // window.opacity = 255; // 100% opacity
+                    
+                    // Clean up our custom properties
+                    delete window._originalWorkspaceIndex;
+                    delete window._wasSticky;
+                });
                 
                 // Clear the overlay windows
                 workspaceEntry.overlayWindows = [];
@@ -162,8 +206,10 @@ export default class WorkspaceOverlayExtension extends Extension {
             // Get windows from the overlay
             const overlayWindows = workspaceEntry.overlayWindows || [];
             
-            // Update the visibility/position of these windows on the current workspace
-            // (We'll implement the actual window manipulation later)
+            // Since windows are set to appear on all workspaces,
+            // we don't need to do additional manipulation when refreshing
+            // Just log the windows for debugging
+            log(`${overlayWindows.length} overlay windows currently visible`);
         }
     }
 
