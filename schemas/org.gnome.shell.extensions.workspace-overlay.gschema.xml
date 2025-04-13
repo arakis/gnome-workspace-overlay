@@ -2,52 +2,52 @@
 <schemalist>
   <schema id="org.gnome.shell.extensions.workspace-overlay" path="/org/gnome/shell/extensions/workspace-overlay/">
     <key name="overlay-workspace-1" type="as">
-      <default><![CDATA[['<Control><Super>1']]]></default>
+      <default><![CDATA[['<Shift><Super>1']]]></default>
       <summary>Shortcut to overlay workspace 1</summary>
       <description>Keyboard shortcut to temporarily overlay windows from workspace 1</description>
     </key>
     <key name="overlay-workspace-2" type="as">
-      <default><![CDATA[['<Control><Super>2']]]></default>
+      <default><![CDATA[['<Shift><Super>2']]]></default>
       <summary>Shortcut to overlay workspace 2</summary>
       <description>Keyboard shortcut to temporarily overlay windows from workspace 2</description>
     </key>
     <key name="overlay-workspace-3" type="as">
-      <default><![CDATA[['<Control><Super>3']]]></default>
+      <default><![CDATA[['<Shift><Super>3']]]></default>
       <summary>Shortcut to overlay workspace 3</summary>
       <description>Keyboard shortcut to temporarily overlay windows from workspace 3</description>
     </key>
     <key name="overlay-workspace-4" type="as">
-      <default><![CDATA[['<Control><Super>4']]]></default>
+      <default><![CDATA[['<Shift><Super>4']]]></default>
       <summary>Shortcut to overlay workspace 4</summary>
       <description>Keyboard shortcut to temporarily overlay windows from workspace 4</description>
     </key>
     <key name="overlay-workspace-5" type="as">
-      <default><![CDATA[['<Control><Super>5']]]></default>
+      <default><![CDATA[['<Shift><Super>5']]]></default>
       <summary>Shortcut to overlay workspace 5</summary>
       <description>Keyboard shortcut to temporarily overlay windows from workspace 5</description>
     </key>
     <key name="overlay-workspace-6" type="as">
-      <default><![CDATA[['<Control><Super>6']]]></default>
+      <default><![CDATA[['<Shift><Super>6']]]></default>
       <summary>Shortcut to overlay workspace 6</summary>
       <description>Keyboard shortcut to temporarily overlay windows from workspace 6</description>
     </key>
     <key name="overlay-workspace-7" type="as">
-      <default><![CDATA[['<Control><Super>7']]]></default>
+      <default><![CDATA[['<Shift><Super>7']]]></default>
       <summary>Shortcut to overlay workspace 7</summary>
       <description>Keyboard shortcut to temporarily overlay windows from workspace 7</description>
     </key>
     <key name="overlay-workspace-8" type="as">
-      <default><![CDATA[['<Control><Super>8']]]></default>
+      <default><![CDATA[['<Shift><Super>8']]]></default>
       <summary>Shortcut to overlay workspace 8</summary>
       <description>Keyboard shortcut to temporarily overlay windows from workspace 8</description>
     </key>
     <key name="overlay-workspace-9" type="as">
-      <default><![CDATA[['<Control><Super>9']]]></default>
+      <default><![CDATA[['<Shift><Super>9']]]></default>
       <summary>Shortcut to overlay workspace 9</summary>
       <description>Keyboard shortcut to temporarily overlay windows from workspace 9</description>
     </key>
     <key name="overlay-workspace-10" type="as">
-      <default><![CDATA[['<Control><Super>0']]]></default>
+      <default><![CDATA[['<Shift><Super>0']]]></default>
       <summary>Shortcut to overlay workspace 10</summary>
       <description>Keyboard shortcut to temporarily overlay windows from workspace 10</description>
     </key>
