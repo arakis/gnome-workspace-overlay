@@ -1,0 +1,8 @@
+{
+  "name": "Workspace Overlay",
+  "description": "Temporarily overlay windows from another workspace onto the current screen",
+  "uuid": "workspace-overlay@arakis",
+  "shell-version": ["48"],
+  "version": 1,
+  "settings-schema": "org.gnome.shell.extensions.workspace-overlay"
+} 

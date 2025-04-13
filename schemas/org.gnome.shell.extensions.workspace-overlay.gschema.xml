@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schemalist>
+  <schema id="org.gnome.shell.extensions.workspace-overlay" path="/org/gnome/shell/extensions/workspace-overlay/">
+    <key name="overlay-workspace-1" type="as">
+      <default><![CDATA[['<Control><Alt>1']]]></default>
+      <summary>Shortcut to overlay workspace 1</summary>
+      <description>Keyboard shortcut to temporarily overlay windows from workspace 1</description>
+    </key>
+  </schema>
+</schemalist> 
