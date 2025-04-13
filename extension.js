@@ -5,6 +5,11 @@ import Shell from 'gi://Shell';
 
 export default class WorkspaceOverlayExtension extends Extension {
     enable() {
+        this._workspaceOverlays = [
+            { sourceWorkspaceIndex: 2, sourceWorkspaceNumber: 3, comment: 'communication' },
+            { sourceWorkspaceIndex: 3, sourceWorkspaceNumber: 4, comment: 'dashboard' },
+        ];
+
         this._workspaceHandlerId = global.workspace_manager.connect(
             'workspace-switched',
             this._onWorkspaceSwitched.bind(this)
