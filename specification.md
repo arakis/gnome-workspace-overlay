@@ -1,35 +1,36 @@
-**Gnome Extension Name:** Workspace Overlay (or similar)
+**Gnome Extension Name:** Workspace Overlay
 
-**Goal:** On Gnome, allow temporary display of windows from a specific *source* workspace onto the current screen(s), overlaying the current global workspace view without actually changing the global workspace.
+**Goal:** On Gnome, allow temporary display of windows from specific *source* workspaces onto all workspaces, creating an overlay effect where selected windows persist across workspace switches.
 
 **Core Functionality:**
 
-1.  **Pull Workspace:**
-    * **Trigger:** User-defined keyboard shortcut (e.g., `Super+Alt+3`).
-    * **Action:** Fetches all windows from the associated *source* workspace (e.g., Workspace 3). Moves these windows to the *current* screen(s) and brings them to the foreground, maintaining their relative stacking order. This creates a temporary overlay on the current (target) workspace.
+1.  **Toggle Workspace Overlay:**
+    * **Trigger:** User-defined keyboard shortcut (e.g., `Ctrl+Alt+3`).
+    * **Action:** Toggles the visibility of all windows from the associated *source* workspace (e.g., Workspace 3) across all workspaces. When activated, windows from the source workspace become "sticky" and appear on every workspace. When toggled again, windows return to their original workspace.
     * **Scope:** Affects all windows of the source workspace.
 
-2.  **Revert Overlay:**
-    * **Trigger:** Activating a standard global workspace switch (e.g., `Super+<Num>`, `Ctrl+Alt+<Arrow>`) OR triggering another "Pull Workspace" shortcut.
-    * **Action:** All windows currently part of the overlay are moved back to their original *source* workspace. The standard workspace switch then proceeds (if applicable).
+2.  **Multiple Concurrent Overlays:**
+    * **Action:** Users can activate overlays from multiple source workspaces simultaneously. Each overlay is managed independently.
+    * **Example:** Windows from both Workspace 3 and Workspace 4 can be shown across all workspaces at the same time.
 
 **Behavior Details:**
 
-* **Persistence:** If an overlay is active on specific screen(s), switching the *global* workspace (the target) will *not* affect those screens. They continue displaying the overlay until a "Revert Overlay" action occurs. Screens *without* an overlay switch normally with the global workspace.
-* **Global Workspaces:** Standard global workspace switching remains the primary navigation method. This extension provides temporary, per-screen overlays *on top of* the current global view.
-* **Multiple Overlays:** Triggering a "Pull" shortcut while another overlay is active will first revert the existing overlay, then apply the new one.
+* **Persistence:** Once an overlay is activated, the windows persist across all workspaces until explicitly toggled off using the same keybinding.
+* **Window Stickiness:** The implementation uses window "sticking" functionality to make windows appear on all workspaces.
+* **Workspace Switching:** When switching workspaces, any active overlay windows remain visible. The extension ensures that overlays follow the user to any workspace they navigate to.
+* **Original State Preservation:** The extension tracks each window's original workspace and "sticky" state, restoring these properties when the overlay is deactivated.
 
 **Configuration:**
 
-* Users must be able to define multiple shortcuts, each mapped to pull windows from a specific source workspace index.
+* Users can define keyboard shortcuts for each workspace, allowing them to toggle overlays for specific workspaces using `Ctrl+Alt+[Workspace Number]`.
 
 **Example Flow:**
 
-* **Setup:** 4 global workspaces. `Super+Alt+3` configured to pull Workspace 3 (source).
-* **State:** Global Workspace 1 active (on Screens 1 & 2) (target).
-* **Action:** User presses `Super+Alt+3`.
-* **Result:** Windows from Workspace 3 (source) appear on Screen 1 & 2 (or focused screen, TBD), overlaying Workspace 1 (target) content.
-* **Action:** User presses `Super+2` (switch global to Workspace 2).
-* **Result:** Screens 1 & 2 *continue* showing the pulled Workspace 3 (source) windows. The underlying global workspace is now Workspace 2.
-* **Action:** User presses `Super+1` (switch global to Workspace 1).
-* **Result:** Pulled Workspace 3 (source) windows return to Workspace 3. Screens 1 & 2 now show Workspace 1 content.
+* **Setup:** Multiple global workspaces with `Ctrl+Alt+3` configured to toggle overlay for Workspace 3.
+* **State:** User is on Workspace 1.
+* **Action:** User presses `Ctrl+Alt+3`.
+* **Result:** Windows from Workspace 3 appear on all workspaces, overlaying the content of the current workspace.
+* **Action:** User switches to Workspace 2.
+* **Result:** Windows from Workspace 3 remain visible, now overlaying Workspace 2 content.
+* **Action:** User presses `Ctrl+Alt+3` again.
+* **Result:** Windows from Workspace 3 are no longer visible on all workspaces and return to only being visible on Workspace 3.
