@@ -55,13 +55,6 @@ export default class WorkspaceOverlayExtension extends Extension {
         const previousWorkspaceIndex = this._currentWorkspaceIndex;
         this._currentWorkspaceIndex = toIndex;
         
-        // Case: Switching to a workspace that is already an overlay
-        if (this._activeOverlayWorkspaces.has(toIndex)) {
-            log(`Switching to workspace ${toIndex} which is currently an overlay`);
-            // Handle removing it from overlay
-            this._stashOverlayWorkspace(toIndex);
-        }
-        
         // Case: Regular workspace switch - make sure overlay windows follow
         this._activeOverlayWorkspaces.forEach(overlayIndex => {
             // If we have active overlays, ensure they still show on the new workspace
