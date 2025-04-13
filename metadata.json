@@ -1,6 +1,6 @@
 {
   "name": "Workspace Overlay",
-  "description": "Temporarily overlay windows from another workspace onto the current screen",
+  "description": "Workspace Overlay lets you quickly show windows from one workspace across all your workspaces, creating a convenient overlay. Perfect for multitasking, it keeps essential windows always visible as you switch between tasks. Easily toggle overlays on and off with customizable shortcuts, and even overlay multiple workspaces simultaneously.",
   "uuid": "workspace-overlay@arakis",
   "shell-version": ["48"],
   "url": "https://github.com/arakis/gnome-workspace-overlay.git",
