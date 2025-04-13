@@ -31,6 +31,33 @@ export default class WorkspaceOverlayExtension extends Extension {
         log(`Workspace switched from index ${from} to index ${to}`);
     }
 
+    /**
+     * List all windows of a specific workspace
+     * @param {number} workspaceIndex - The index of the workspace (0-based)
+     * @returns {Meta.Window[]} - Array of windows in the workspace
+     */
+    getWindowsOfWorkspace(workspaceIndex) {
+        // Get the workspace at the specified index
+        const workspace = global.workspace_manager.get_workspace_by_index(workspaceIndex);
+        
+        if (!workspace) {
+            log(`Workspace with index ${workspaceIndex} not found`);
+            return [];
+        }
+        
+        // Get all windows on this workspace
+        const windows = workspace.list_windows();
+        
+        // Log window information (optional)
+        windows.forEach((window, index) => {
+            if (window.get_title) {
+                log(`Window ${index} on workspace ${workspaceIndex}: ${window.get_title()}`);
+            }
+        });
+        
+        return windows;
+    }
+
     _keyBindingSettings() {
         // Create keybindings for workspaces 1-10
         for (let i = 1; i <= 10; i++) {
@@ -42,6 +69,11 @@ export default class WorkspaceOverlayExtension extends Extension {
                 Shell.ActionMode.NORMAL,
                 () => {
                     log(`CTRL+ALT+${i % 10} was pressed for workspace ${i}!`);
+                    // Get windows from workspace i
+                    // Note: Workspace numbers are 1-based, but indexes are 0-based
+                    const workspaceIndex = i - 1;
+                    const windows = this.getWindowsOfWorkspace(workspaceIndex);
+                    log(`Found ${windows.length} windows in workspace ${i} (index ${workspaceIndex})`);
                     // Logic to overlay windows from workspace i
                 }
             );
