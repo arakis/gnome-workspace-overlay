@@ -15,9 +15,14 @@ export default class WorkspaceOverlayExtension extends Extension {
                 sourceWorkspaceIndex: i,
                 sourceWorkspaceNumber: i + 1,  // 1-based for display
                 comment: i === 2 ? 'communication' : (i === 3 ? 'dashboard' : ''),
-                isOverlay: false  // All workspaces start as non-overlay
+                isOverlay: false,  // All workspaces start as non-overlay
+                overlayWindows: []  // Windows from this workspace shown as overlay
             });
         }
+
+        // Track current workspace and active overlays
+        this._currentWorkspaceIndex = global.workspace_manager.get_active_workspace_index();
+        this._activeOverlayWorkspaces = new Set(); // Set of workspace indices currently shown as overlay
 
         this._workspaceHandlerId = global.workspace_manager.connect(
             'workspace-switched',
@@ -32,12 +37,36 @@ export default class WorkspaceOverlayExtension extends Extension {
             global.workspace_manager.disconnect(this._workspaceHandlerId);
             this._workspaceHandlerId = null;
         }
+        
+        // Clean up any active overlays
+        this._activeOverlayWorkspaces.forEach(index => {
+            this._stashOverlayWorkspace(index);
+        });
+        
+        this._activeOverlayWorkspaces.clear();
         this._removeKeybindings();
         log('Workspace Overlay extension disabled');
     }
 
-    _onWorkspaceSwitched(workspaceManager, from, to, direction) {
-        log(`Workspace switched from index ${from} to index ${to}`);
+    _onWorkspaceSwitched(workspaceManager, fromIndex, toIndex, direction) {
+        log(`Workspace switched from index ${fromIndex} to index ${toIndex}`);
+        
+        // Store previous and new workspace
+        const previousWorkspaceIndex = this._currentWorkspaceIndex;
+        this._currentWorkspaceIndex = toIndex;
+        
+        // Case: Switching to a workspace that is already an overlay
+        if (this._activeOverlayWorkspaces.has(toIndex)) {
+            log(`Switching to workspace ${toIndex} which is currently an overlay`);
+            // Handle removing it from overlay
+            this._stashOverlayWorkspace(toIndex);
+        }
+        
+        // Case: Regular workspace switch - make sure overlay windows follow
+        this._activeOverlayWorkspaces.forEach(overlayIndex => {
+            // If we have active overlays, ensure they still show on the new workspace
+            this._refreshOverlayWorkspace(overlayIndex);
+        });
     }
 
     /**
@@ -67,6 +96,72 @@ export default class WorkspaceOverlayExtension extends Extension {
         return windows;
     }
 
+    /**
+     * Pull a workspace as an overlay to show on other workspaces
+     * @param {number} workspaceIndex - The index of the workspace to pull as overlay
+     */
+    _pullOverlayWorkspace(workspaceIndex) {
+        log(`Pulling workspace ${workspaceIndex} as overlay`);
+        
+        // Mark the workspace as an overlay
+        if (workspaceIndex < this._workspaces.length) {
+            const workspaceEntry = this._workspaces[workspaceIndex];
+            workspaceEntry.isOverlay = true;
+            this._activeOverlayWorkspaces.add(workspaceIndex);
+            
+            // Get windows from the overlay workspace
+            const overlayWindows = this.getWindowsOfWorkspace(workspaceIndex);
+            workspaceEntry.overlayWindows = overlayWindows;
+            
+            // Store original workspace information for each window
+            // (We'll implement the actual window manipulation later)
+        }
+    }
+    
+    /**
+     * Remove a workspace from being shown as overlay
+     * @param {number} workspaceIndex - The index of the workspace to stash (hide overlay)
+     */
+    _stashOverlayWorkspace(workspaceIndex) {
+        log(`Stashing overlay workspace ${workspaceIndex}`);
+        
+        if (this._activeOverlayWorkspaces.has(workspaceIndex)) {
+            // Mark the workspace as no longer an overlay
+            if (workspaceIndex < this._workspaces.length) {
+                const workspaceEntry = this._workspaces[workspaceIndex];
+                workspaceEntry.isOverlay = false;
+                
+                // Return windows to their original workspace
+                // (We'll implement the actual window manipulation later)
+                
+                // Clear the overlay windows
+                workspaceEntry.overlayWindows = [];
+            }
+            
+            // Clean up tracking
+            this._activeOverlayWorkspaces.delete(workspaceIndex);
+        }
+    }
+    
+    /**
+     * Refresh an overlay workspace's windows on the current workspace
+     * @param {number} overlayWorkspaceIndex - The index of the overlay workspace
+     */
+    _refreshOverlayWorkspace(overlayWorkspaceIndex) {
+        log(`Refreshing overlay windows from workspace ${overlayWorkspaceIndex} on current workspace ${this._currentWorkspaceIndex}`);
+        
+        // Get the workspace entry
+        if (overlayWorkspaceIndex < this._workspaces.length) {
+            const workspaceEntry = this._workspaces[overlayWorkspaceIndex];
+            
+            // Get windows from the overlay
+            const overlayWindows = workspaceEntry.overlayWindows || [];
+            
+            // Update the visibility/position of these windows on the current workspace
+            // (We'll implement the actual window manipulation later)
+        }
+    }
+
     _keyBindingSettings() {
         // Create keybindings for workspaces 1-10
         for (let i = 1; i <= 10; i++) {
@@ -78,19 +173,17 @@ export default class WorkspaceOverlayExtension extends Extension {
                 Shell.ActionMode.NORMAL,
                 () => {
                     log(`CTRL+ALT+${i % 10} was pressed for workspace ${i}!`);
-                    // Get windows from workspace i
                     // Note: Workspace numbers are 1-based, but indexes are 0-based
                     const workspaceIndex = i - 1;
                     
-                    // Set this workspace as an overlay
-                    if (workspaceIndex < this._workspaces.length) {
-                        this._workspaces[workspaceIndex].isOverlay = true;
-                        log(`Set workspace ${i} (index ${workspaceIndex}) as overlay`);
+                    // Toggle overlay state
+                    if (this._activeOverlayWorkspaces.has(workspaceIndex)) {
+                        // If already an overlay, stash it
+                        this._stashOverlayWorkspace(workspaceIndex);
+                    } else {
+                        // Otherwise, pull it as an overlay
+                        this._pullOverlayWorkspace(workspaceIndex);
                     }
-                    
-                    const windows = this.getWindowsOfWorkspace(workspaceIndex);
-                    log(`Found ${windows.length} windows in workspace ${i} (index ${workspaceIndex})`);
-                    // Logic to overlay windows from workspace i
                 }
             );
         }
