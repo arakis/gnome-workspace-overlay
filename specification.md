@@ -5,7 +5,7 @@
 **Core Functionality:**
 
 1.  **Toggle Workspace Overlay:**
-    * **Trigger:** User-defined keyboard shortcut (e.g., `Ctrl+Super+3`).
+    * **Trigger:** User-defined keyboard shortcut (e.g., `<Shift><Super>3`).
     * **Action:** Toggles the visibility of all windows from the associated *source* workspace (e.g., Workspace 3) across all workspaces. When activated, windows from the source workspace become "sticky" and appear on every workspace. When toggled again, windows return to their original workspace.
     * **Scope:** Affects all windows of the source workspace.
 
@@ -22,15 +22,15 @@
 
 **Configuration:**
 
-* Users can define keyboard shortcuts for each workspace, allowing them to toggle overlays for specific workspaces using `Ctrl+Super+[Workspace Number]`.
+* Users can define keyboard shortcuts for each workspace, allowing them to toggle overlays for specific workspaces using `<Shift><Super>+[Workspace Number]`.
 
 **Example Flow:**
 
-* **Setup:** Multiple global workspaces with `Ctrl+Super+3` configured to toggle overlay for Workspace 3.
+* **Setup:** Multiple global workspaces with `<Shift><Super>3` configured to toggle overlay for Workspace 3.
 * **State:** User is on Workspace 1.
-* **Action:** User presses `Ctrl+Super+3`.
+* **Action:** User presses `<Shift><Super>3`.
 * **Result:** Windows from Workspace 3 appear on all workspaces, overlaying the content of the current workspace.
 * **Action:** User switches to Workspace 2.
 * **Result:** Windows from Workspace 3 remain visible, now overlaying Workspace 2 content.
-* **Action:** User presses `Ctrl+Super+3` again.
+* **Action:** User presses `<Shift><Super>3` again.
 * **Result:** Windows from Workspace 3 are no longer visible on all workspaces and return to only being visible on Workspace 3.

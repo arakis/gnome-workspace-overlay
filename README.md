@@ -18,7 +18,7 @@ You can even overlay windows from multiple source workspaces at the same time!
 ## Usage
 
 1.  **Open Extension Preferences:** Use the Extensions app or `gnome-extensions prefs workspace-overlay@arakis`.
-2.  **Configure Shortcuts:** Assign a keyboard shortcut (e.g., `<Super><Control>1` for Workspace 1, `<Super><Control>2` for Workspace 2, etc.) for each workspace you want to overlay.
+2.  **Configure Shortcuts:** Assign a keyboard shortcut (e.g., `<Shift><Super>1` for Workspace 1, `<Shift><Super>2` for Workspace 2, etc.) for each workspace you want to overlay.
 3.  **Activate/Deactivate Overlay:** Press the configured shortcut for a specific workspace to toggle its windows' visibility across all workspaces.
 
 ## Installation

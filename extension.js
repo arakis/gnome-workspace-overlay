@@ -239,4 +239,4 @@ export default class WorkspaceOverlayExtension extends Extension {
             Main.wm.removeKeybinding(`overlay-workspace-${i}`);
         }
     }
-} 
+}
