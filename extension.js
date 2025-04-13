@@ -32,18 +32,26 @@ export default class WorkspaceOverlayExtension extends Extension {
     }
 
     _keyBindingSettings() {
-        Main.wm.addKeybinding(
-            'overlay-workspace-1',
-            this.getSettings(),
-            Meta.KeyBindingFlags.IGNORE_AUTOREPEAT,
-            Shell.ActionMode.NORMAL,
-            () => {
-                log('CTRL+ALT+1 was pressed!');
-            }
-        );
+        // Create keybindings for workspaces 1-10
+        for (let i = 1; i <= 10; i++) {
+            const keyName = `overlay-workspace-${i}`;
+            Main.wm.addKeybinding(
+                keyName,
+                this.getSettings(),
+                Meta.KeyBindingFlags.IGNORE_AUTOREPEAT,
+                Shell.ActionMode.NORMAL,
+                () => {
+                    log(`CTRL+ALT+${i % 10} was pressed for workspace ${i}!`);
+                    // Logic to overlay windows from workspace i
+                }
+            );
+        }
     }
 
     _removeKeybindings() {
-        Main.wm.removeKeybinding('overlay-workspace-1');
+        // Remove keybindings for workspaces 1-10
+        for (let i = 1; i <= 10; i++) {
+            Main.wm.removeKeybinding(`overlay-workspace-${i}`);
+        }
     }
 } 
