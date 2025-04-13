@@ -3,6 +3,7 @@ import Gtk from 'gi://Gtk';
 import Gdk from 'gi://Gdk';
 import Gio from 'gi://Gio';
 import GObject from 'gi://GObject';
+import GLib from 'gi://GLib';
 import { ExtensionPreferences, gettext as _ } from 'resource:///org/gnome/Shell/Extensions/js/extensions/prefs.js';
 
 // Log helper function
@@ -139,26 +140,37 @@ export default class WorkspaceOverlayPreferences extends ExtensionPreferences {
                 return Gdk.EVENT_STOP; // Stop propagation
             }
 
-            // Ignore modifier-only presses
-            if (Gdk.keyval_is_modifier(keyval)) {
-                log('Modifier key pressed, ignoring.');
-                return Gdk.EVENT_PROPAGATE; // Allow propagation
+            // Ignore standalone modifier key presses
+            if ([Gdk.KEY_Control_L, Gdk.KEY_Control_R, 
+                 Gdk.KEY_Shift_L, Gdk.KEY_Shift_R, 
+                 Gdk.KEY_Alt_L, Gdk.KEY_Alt_R, 
+                 Gdk.KEY_Super_L, Gdk.KEY_Super_R].includes(keyval)) {
+                log('Standalone modifier key pressed, ignoring.');
+                return Gdk.EVENT_PROPAGATE;
             }
 
-            // Use Gtk.accelerator_name to get the string representation (e.g., '<Shift>a')
-            const accelName = Gtk.accelerator_name(keyval, state);
-            log(`Captured shortcut: ${accelName}`);
+            // Filter out irrelevant modifiers for accelerator generation
+            const relevantModifiers = state & (
+                Gdk.ModifierType.CONTROL_MASK | 
+                Gdk.ModifierType.SHIFT_MASK | 
+                Gdk.ModifierType.ALT_MASK | 
+                Gdk.ModifierType.SUPER_MASK
+            );
+
+            // Generate the accelerator name
+            const accelName = Gtk.accelerator_name(keyval, relevantModifiers);
+            log(`Captured shortcut: ${accelName} (keyval: ${keyval}, filtered state: ${relevantModifiers})`);
 
             if (accelName) {
-                 feedbackLabel.set_label(_(`Captured: ${getShortcutLabel(accelName)}`));
-                 settings.set_strv(key, [accelName]);
-                 // Short delay before closing to show feedback
-                 GLib.timeout_add(GLib.PRIORITY_DEFAULT, 50, () => {
+                feedbackLabel.set_label(_(`Captured: ${getShortcutLabel(accelName)}`));
+                settings.set_strv(key, [accelName]);
+                // Short delay before closing to show feedback
+                GLib.timeout_add(GLib.PRIORITY_DEFAULT, 500, () => {
                     dialog.close();
                     return GLib.SOURCE_REMOVE;
-                 });
+                });
             } else {
-                 feedbackLabel.set_label(_('Invalid combination'));
+                feedbackLabel.set_label(_('Invalid combination'));
             }
 
             return Gdk.EVENT_STOP; // Stop propagation
