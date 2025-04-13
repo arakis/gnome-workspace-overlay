@@ -126,9 +126,6 @@ export default class WorkspaceOverlayExtension extends Extension {
 
                 // Activate the window to bring it to the foreground
                 Main.activateWindow(window);
-                
-                // Optional: Change opacity or add a border to indicate overlay status
-                // window.opacity = 220; // 85% opacity
             });
             
             log(`Made ${overlayWindows.length} windows from workspace ${workspaceIndex} visible across all workspaces`);
