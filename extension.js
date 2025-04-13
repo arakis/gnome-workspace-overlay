@@ -84,12 +84,8 @@ export default class WorkspaceOverlayExtension extends Extension {
             window.get_workspace() === workspace
         );
         
-        // Log window information (optional)
-        windows.forEach((window, index) => {
-            if (window.get_title) {
-                log(`Window ${index} on workspace ${workspaceIndex}: ${window.get_title()}`);
-            }
-        });
+        // Log only the count of windows, not individual details
+        log(`Found ${windows.length} windows on workspace ${workspaceIndex}`);
         
         return windows.reverse();
     }
@@ -188,8 +184,8 @@ export default class WorkspaceOverlayExtension extends Extension {
                     // window.opacity = 255; // 100% opacity
                     
                     // Clean up our custom properties
-                    delete window._originalWorkspaceIndex;
-                    delete window._wasSticky;
+                    if ('_originalWorkspaceIndex' in window) delete window._originalWorkspaceIndex;
+                    if ('_wasSticky' in window) delete window._wasSticky;
                 });
                 
                 // Clear the stored overlay windows now that they are processed
@@ -211,7 +207,7 @@ export default class WorkspaceOverlayExtension extends Extension {
                 Meta.KeyBindingFlags.IGNORE_AUTOREPEAT,
                 Shell.ActionMode.NORMAL,
                 () => {
-                    log(`CTRL+Super+${i % 10} was pressed for workspace ${i}!`);
+                    log(`Shift+Super+${i % 10 === 0 ? '0' : i % 10} was pressed for workspace ${i}!`);
                     // Note: Workspace numbers are 1-based, but indexes are 0-based
                     const workspaceIndex = i - 1;
                     

@@ -4,6 +4,5 @@
   "uuid": "workspace-overlay@arakis",
   "shell-version": ["48"],
   "url": "https://github.com/arakis/gnome-workspace-overlay.git",
-  "version": 1,
   "settings-schema": "org.gnome.shell.extensions.workspace-overlay"
 }
