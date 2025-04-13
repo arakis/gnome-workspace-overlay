@@ -207,7 +207,7 @@ export default class WorkspaceOverlayExtension extends Extension {
                 Meta.KeyBindingFlags.IGNORE_AUTOREPEAT,
                 Shell.ActionMode.NORMAL,
                 () => {
-                    log(`Shift+Super+${i % 10 === 0 ? '0' : i % 10} was pressed for workspace ${i}!`);
+                    log(`Key binding was pressed for workspace ${i}!`);
                     // Note: Workspace numbers are 1-based, but indexes are 0-based
                     const workspaceIndex = i - 1;
                     
