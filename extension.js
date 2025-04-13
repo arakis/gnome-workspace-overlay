@@ -91,7 +91,7 @@ export default class WorkspaceOverlayExtension extends Extension {
             }
         });
         
-        return windows;
+        return windows.reverse();
     }
 
     /**
@@ -123,6 +123,9 @@ export default class WorkspaceOverlayExtension extends Extension {
                 
                 // Make windows appear on all workspaces
                 window.stick();
+
+                // Activate the window to bring it to the foreground
+                Main.activateWindow(window);
                 
                 // Optional: Change opacity or add a border to indicate overlay status
                 // window.opacity = 220; // 85% opacity
