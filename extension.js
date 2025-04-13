@@ -148,10 +148,26 @@ export default class WorkspaceOverlayExtension extends Extension {
                 const workspaceEntry = this._workspaces[workspaceIndex];
                 workspaceEntry.isOverlay = false;
                 
-                // Return windows to their original workspace
-                const overlayWindows = workspaceEntry.overlayWindows || [];
+                // Original list of windows that were pulled for this overlay
+                const originalOverlayWindows = workspaceEntry.overlayWindows || [];
+                if (originalOverlayWindows.length === 0) {
+                    this._activeOverlayWorkspaces.delete(workspaceIndex);
+                    return; // Nothing to stash
+                }
+
+                // Get current windows on the workspace in their current stack order
+                const currentWindowsInStackOrder = this.getWindowsOfWorkspace(this._currentWorkspaceIndex);
+
+                // Filter to get only the windows that were part of the original overlay, 
+                // maintaining the current stack order.
+                const windowsToStashInOrder = currentWindowsInStackOrder.filter(window => 
+                    originalOverlayWindows.includes(window)
+                );
                 
-                overlayWindows.forEach(window => {
+                log(`Stashing ${windowsToStashInOrder.length} windows in current stack order`);
+
+                // Return windows to their original workspace in the current stack order
+                windowsToStashInOrder.forEach(window => {
                     // Skip invalid windows
                     if (!window || !window.get_workspace) 
                         return;
@@ -179,7 +195,7 @@ export default class WorkspaceOverlayExtension extends Extension {
                     delete window._wasSticky;
                 });
                 
-                // Clear the overlay windows
+                // Clear the stored overlay windows now that they are processed
                 workspaceEntry.overlayWindows = [];
             }
             
