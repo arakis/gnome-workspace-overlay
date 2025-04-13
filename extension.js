@@ -72,7 +72,7 @@ export default class WorkspaceOverlayExtension extends Extension {
     /**
      * List all windows of a specific workspace
      * @param {number} workspaceIndex - The index of the workspace (0-based)
-     * @returns {Meta.Window[]} - Array of windows in the workspace
+     * @returns {Meta.Window[]} - Array of windows in the workspace, ordered by their stacking order
      */
     getWindowsOfWorkspace(workspaceIndex) {
         // Get the workspace at the specified index
@@ -83,8 +83,13 @@ export default class WorkspaceOverlayExtension extends Extension {
             return [];
         }
         
-        // Get all windows on this workspace
-        const windows = workspace.list_windows();
+        // Get all windows from the display in stacking order
+        const allWindows = global.display.get_tab_list(Meta.TabList.NORMAL, workspace);
+        
+        // Filter to keep only windows that are on this workspace
+        const windows = allWindows.filter(window => 
+            window.get_workspace() === workspace
+        );
         
         // Log window information (optional)
         windows.forEach((window, index) => {
