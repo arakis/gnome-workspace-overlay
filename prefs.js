@@ -1,162 +1,169 @@
-// prefs.js for Workspace Overlay GNOME Shell Extension
-
-imports.gi.versions.Adw = '1';
-imports.gi.versions.Gtk = '4.0';
-imports.gi.versions.Gdk = '4.0';
-
 import Adw from 'gi://Adw';
 import Gtk from 'gi://Gtk';
+import Gdk from 'gi://Gdk';
 import Gio from 'gi://Gio';
 import GObject from 'gi://GObject';
-import { ExtensionPreferences } from 'resource:///org/gnome/Shell/Extensions/js/extensions/prefs.js';
+import { ExtensionPreferences, gettext as _ } from 'resource:///org/gnome/Shell/Extensions/js/extensions/prefs.js';
 
 // Log helper function
 function log(msg) {
     console.log(`[Workspace-Overlay] ${msg}`);
 }
 
+// Helper function to create a Gtk shortcut label string
+function getShortcutLabel(accelerator) {
+    if (!accelerator) {
+        return _('Disabled');
+    }
+    // Gtk.accelerator_parse is available in GTK4 but deprecated
+    // and might not parse all modern Gtk.ShortcutTrigger strings correctly.
+    // For common cases like '<Shift><Super>1' it should work.
+    // A more robust GTK4 approach involves Gtk.ShortcutTrigger.parse_string
+    // but Gtk.accelerator_get_label is simpler here if it works.
+    const [ok, keyval, mods] = Gtk.accelerator_parse(accelerator);
+    if (ok) {
+        return Gtk.accelerator_get_label(keyval, mods);
+    }
+    // Fallback for complex or unparseable accelerators
+    return accelerator;
+}
+
 export default class WorkspaceOverlayPreferences extends ExtensionPreferences {
-    constructor(metadata) {
-        super(metadata);
+    fillPreferencesWindow(window) {
+        // Create a preferences page
+        const page = new Adw.PreferencesPage();
+        window.add(page);
+
+        // Create a preferences group for the shortcuts
+        const group = new Adw.PreferencesGroup({
+            title: _('Keyboard Shortcuts'),
+            description: _('Set the shortcuts to overlay workspaces.'),
+        });
+        page.add(group);
+
+        // Get the extension settings
+        const settings = this.getSettings();
+
+        // Add rows for each shortcut setting
+        for (let i = 1; i <= 10; i++) {
+            const key = `overlay-workspace-${i}`;
+            const title = _(`Overlay Workspace ${i}`);
+            const row = this._createShortcutRow(title, settings, key);
+            group.add(row);
+        }
     }
 
-    getPreferencesWidget() {
-        const settings = this.getSettings();
-        log('Creating preferences widget');
-        
-        // Create parent box
+    _createShortcutRow(title, settings, key) {
+        const row = new Adw.ActionRow({ title: title });
+
+        const button = new Gtk.Button({
+            valign: Gtk.Align.CENTER,
+            hexpand: false,
+            halign: Gtk.Align.END,
+        });
+        row.add_suffix(button);
+        row.activatable_widget = button;
+
+        const updateLabel = () => {
+            const accelStr = settings.get_strv(key)[0] || '';
+            button.set_label(getShortcutLabel(accelStr));
+        };
+
+        // Update the label initially and when the setting changes
+        updateLabel();
+        settings.connect(`changed::${key}`, updateLabel);
+
+        // Handle button click to open the edit dialog
+        button.connect('clicked', () => {
+            this._editShortcut(row.get_root(), settings, key, title);
+        });
+
+        return row;
+    }
+
+    _editShortcut(parentWindow, settings, key, title) {
+        const dialog = new Gtk.Window({
+            transient_for: parentWindow,
+            modal: true,
+            title: _(`Set Shortcut for ${title}`),
+            destroy_with_parent: true,
+            resizable: false,
+        });
+
         const box = new Gtk.Box({
             orientation: Gtk.Orientation.VERTICAL,
-            margin_top: 12,
-            margin_bottom: 12,
-            margin_start: 12,
-            margin_end: 12,
-            spacing: 12
+            spacing: 15,
+            margin_top: 15,
+            margin_bottom: 15,
+            margin_start: 15,
+            margin_end: 15,
+        });
+        dialog.set_child(box);
+
+        const instructions = new Gtk.Label({
+            label: _('Press the desired key combination,\nor Backspace to clear the shortcut,\nor Escape to cancel.'),
+            halign: Gtk.Align.CENTER,
+        });
+        box.append(instructions);
+
+        const currentShortcut = settings.get_strv(key)[0] || '';
+        const currentLabel = new Gtk.Label({
+            label: _(`Current: ${getShortcutLabel(currentShortcut)}`),
+            halign: Gtk.Align.CENTER,
+        });
+        box.append(currentLabel);
+
+        const feedbackLabel = new Gtk.Label({
+            label: _('Waiting for input...'),
+            halign: Gtk.Align.CENTER,
+        });
+        box.append(feedbackLabel);
+
+        // Capture key events
+        const controller = new Gtk.EventControllerKey();
+        dialog.add_controller(controller);
+
+        controller.connect('key-pressed', (ctrl, keyval, keycode, state) => {
+            log(`Key pressed: keyval=${keyval}, keycode=${keycode}, state=${state}, name=${Gdk.keyval_name(keyval)}`);
+
+            if (keyval === Gdk.KEY_Escape) {
+                log('Escape pressed, cancelling.');
+                dialog.close();
+                return Gdk.EVENT_STOP; // Stop propagation
+            }
+
+            if (keyval === Gdk.KEY_BackSpace) {
+                log('Backspace pressed, clearing shortcut.');
+                settings.set_strv(key, []);
+                dialog.close();
+                return Gdk.EVENT_STOP; // Stop propagation
+            }
+
+            // Ignore modifier-only presses
+            if (Gdk.keyval_is_modifier(keyval)) {
+                log('Modifier key pressed, ignoring.');
+                return Gdk.EVENT_PROPAGATE; // Allow propagation
+            }
+
+            // Use Gtk.accelerator_name to get the string representation (e.g., '<Shift>a')
+            const accelName = Gtk.accelerator_name(keyval, state);
+            log(`Captured shortcut: ${accelName}`);
+
+            if (accelName) {
+                 feedbackLabel.set_label(_(`Captured: ${getShortcutLabel(accelName)}`));
+                 settings.set_strv(key, [accelName]);
+                 // Short delay before closing to show feedback
+                 GLib.timeout_add(GLib.PRIORITY_DEFAULT, 50, () => {
+                    dialog.close();
+                    return GLib.SOURCE_REMOVE;
+                 });
+            } else {
+                 feedbackLabel.set_label(_('Invalid combination'));
+            }
+
+            return Gdk.EVENT_STOP; // Stop propagation
         });
 
-        // Add heading
-        const heading = new Adw.WindowTitle({
-            title: "Workspace Overlay Shortcuts",
-            subtitle: "Set keyboard shortcuts for workspace overlays"
-        });
-        box.append(heading);
-
-        // Create entries for workspaces 1-10
-        for (let i = 1; i <= 10; i++) {
-            const row = new Adw.ActionRow({
-                title: `Workspace ${i}`,
-                subtitle: `Shortcut to overlay workspace ${i} windows`,
-            });
-
-            // Get the current shortcut
-            const shortcutSetting = `overlay-workspace-${i}`;
-            const accelerator = settings.get_strv(shortcutSetting)[0] || "";
-            
-            // Create a button to display and capture the shortcut
-            const shortcutBtn = new Gtk.Button({
-                label: accelerator ? accelerator : "Click to set shortcut",
-                valign: Gtk.Align.CENTER,
-                has_frame: true,
-            });
-            
-            // Track shortcut index for logging
-            const wsIndex = i;
-            
-            // Shortcut capture handler
-            shortcutBtn.connect('clicked', () => {
-                log(`Button clicked for workspace ${wsIndex}`);
-                
-                // Create dialog for shortcut capture
-                const dialog = new Gtk.Dialog({
-                    title: `Set shortcut for Workspace ${wsIndex}`,
-                    modal: true,
-                    use_header_bar: 1,
-                });
-                
-                // Try to find parent window in different ways
-                try {
-                    // Try to get the root
-                    const root = box.get_root();
-                    if (root) {
-                        log('Found root window');
-                        dialog.set_transient_for(root);
-                    } else {
-                        log('No root window found for box');
-                        
-                        // Alternative approach: find the toplevel widget
-                        const toplevel = box.get_toplevel();
-                        if (Gtk.is_window(toplevel)) {
-                            log('Found toplevel window');
-                            dialog.set_transient_for(toplevel);
-                        } else {
-                            log('No valid toplevel window found');
-                        }
-                    }
-                } catch (e) {
-                    log(`Error setting transient_for: ${e.message}`);
-                }
-                
-                // Add cancel button
-                dialog.add_button("Cancel", Gtk.ResponseType.CANCEL);
-                
-                // Add content area with instructions
-                const contentArea = dialog.get_content_area();
-                contentArea.append(new Gtk.Label({
-                    label: "Press keyboard shortcut...",
-                    margin_top: 12,
-                    margin_bottom: 12,
-                    margin_start: 12,
-                    margin_end: 12,
-                }));
-                
-                // Handler for key press events
-                const controller = new Gtk.EventControllerKey();
-                dialog.add_controller(controller);
-                
-                controller.connect('key-pressed', (_widget, keyval, keycode, state) => {
-                    log(`Key pressed: keyval=${keyval}, keycode=${keycode}, state=${state}`);
-                    
-                    // Filter out Escape key used to cancel
-                    if (keyval === Gdk.KEY_Escape) {
-                        log('Escape pressed, canceling');
-                        dialog.response(Gtk.ResponseType.CANCEL);
-                        return Gdk.EVENT_STOP;
-                    }
-                    
-                    // Create accelerator string
-                    const mask = state & Gtk.accelerator_get_default_mod_mask();
-                    const accel = Gtk.accelerator_name(keyval, mask);
-                    
-                    log(`Created accelerator: ${accel}`);
-                    
-                    if (accel) {
-                        // Save the accelerator
-                        settings.set_strv(shortcutSetting, [accel]);
-                        shortcutBtn.set_label(accel);
-                        dialog.response(Gtk.ResponseType.ACCEPT);
-                    }
-                    
-                    return Gdk.EVENT_STOP;
-                });
-                
-                // Show dialog and handle response
-                dialog.connect('response', (_dialog, response) => {
-                    log(`Dialog response: ${response}`);
-                    dialog.destroy();
-                });
-                
-                try {
-                    log('Showing dialog');
-                    dialog.show();
-                } catch (e) {
-                    log(`Error showing dialog: ${e.message}`);
-                }
-            });
-            
-            row.add_suffix(shortcutBtn);
-            box.append(row);
-        }
-
-        return box;
+        dialog.present();
     }
-} 
+}
