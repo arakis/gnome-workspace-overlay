@@ -137,21 +137,21 @@ export default class WorkspaceOverlayExtension extends Extension {
     
     /**
      * Remove a workspace from being shown as overlay
-     * @param {number} workspaceIndex - The index of the workspace to stash (hide overlay)
+     * @param {number} sourceWorkspaceIndex - The index of the workspace to stash (hide overlay)
      */
-    _stashOverlayWorkspace(workspaceIndex) {
-        log(`Stashing overlay workspace ${workspaceIndex}`);
+    _stashOverlayWorkspace(sourceWorkspaceIndex) {
+        log(`Stashing overlay workspace ${sourceWorkspaceIndex}`);
         
-        if (this._activeOverlayWorkspaces.has(workspaceIndex)) {
+        if (this._activeOverlayWorkspaces.has(sourceWorkspaceIndex)) {
             // Mark the workspace as no longer an overlay
-            if (workspaceIndex < this._workspaces.length) {
-                const workspaceEntry = this._workspaces[workspaceIndex];
+            if (sourceWorkspaceIndex < this._workspaces.length) {
+                const workspaceEntry = this._workspaces[sourceWorkspaceIndex];
                 workspaceEntry.isOverlay = false;
                 
                 // Original list of windows that were pulled for this overlay
                 const originalOverlayWindows = workspaceEntry.overlayWindows || [];
                 if (originalOverlayWindows.length === 0) {
-                    this._activeOverlayWorkspaces.delete(workspaceIndex);
+                    this._activeOverlayWorkspaces.delete(sourceWorkspaceIndex);
                     return; // Nothing to stash
                 }
 
@@ -200,7 +200,7 @@ export default class WorkspaceOverlayExtension extends Extension {
             }
             
             // Clean up tracking
-            this._activeOverlayWorkspaces.delete(workspaceIndex);
+            this._activeOverlayWorkspaces.delete(sourceWorkspaceIndex);
         }
     }
     
