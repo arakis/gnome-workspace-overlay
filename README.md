@@ -29,7 +29,7 @@ However, you also have two messenger applications, arranged side-by-side, on Wor
 
 ## Installation
 
-1.  ~~**Through extensions.gnome.org (Recommended):** Search for "Workspace Overlay" and install it directly from the website.~~
+1.  **Through extensions.gnome.org (Recommended):** Search for "Workspace Overlay" and install it directly from the website, or use this direct link: https://extensions.gnome.org/extension/8058/workspace-overlay
 2.  **Manual Installation:**
     *   Clone or download this repository.
     *   Copy the extension folder (`workspace-overlay@arakis`) to `~/.local/share/gnome-shell/extensions/`.
