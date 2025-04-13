@@ -57,17 +57,15 @@ export default class WorkspaceOverlayPreferences extends ExtensionPreferences {
     _createShortcutRow(title, settings, key) {
         const row = new Adw.ActionRow({ title: title });
 
-        const button = new Gtk.Button({
+        const shortcutButton = new Gtk.Button({
             valign: Gtk.Align.CENTER,
-            hexpand: false,
-            halign: Gtk.Align.END,
         });
-        row.add_suffix(button);
-        row.activatable_widget = button;
+        // Keep row.activatable_widget pointing to the main shortcut button
+        row.activatable_widget = shortcutButton;
 
         const updateLabel = () => {
             const accelStr = settings.get_strv(key)[0] || '';
-            button.set_label(getShortcutLabel(accelStr));
+            shortcutButton.set_label(getShortcutLabel(accelStr));
         };
 
         // Update the label initially and when the setting changes
@@ -75,9 +73,34 @@ export default class WorkspaceOverlayPreferences extends ExtensionPreferences {
         settings.connect(`changed::${key}`, updateLabel);
 
         // Handle button click to open the edit dialog
-        button.connect('clicked', () => {
+        shortcutButton.connect('clicked', () => {
             this._editShortcut(row.get_root(), settings, key, title);
         });
+
+        // Create Reset button
+        const resetButton = new Gtk.Button({
+            icon_name: 'edit-clear-symbolic', // Use a standard icon
+            valign: Gtk.Align.CENTER,
+            tooltip_text: _('Reset to default'),
+            css_classes: ['flat'], // Make it look less prominent than the main button
+        });
+        resetButton.connect('clicked', () => {
+            log(`Resetting shortcut for key: ${key}`);
+            settings.reset(key); // Reset the setting to its default value
+        });
+
+        // Use a box to hold both buttons
+        const buttonBox = new Gtk.Box({
+            orientation: Gtk.Orientation.HORIZONTAL,
+            spacing: 6, // Add some space between buttons
+            valign: Gtk.Align.CENTER,
+            hexpand: false,
+            halign: Gtk.Align.END,
+        });
+        buttonBox.append(shortcutButton);
+        buttonBox.append(resetButton);
+
+        row.add_suffix(buttonBox); // Add the box containing both buttons
 
         return row;
     }
