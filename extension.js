@@ -58,7 +58,7 @@ export default class WorkspaceOverlayExtension extends Extension {
         // Case: Regular workspace switch - make sure overlay windows follow
         this._activeOverlayWorkspaces.forEach(overlayIndex => {
             // If we have active overlays, ensure they still show on the new workspace
-            this._refreshOverlayWorkspace(overlayIndex);
+            // this._refreshOverlayWorkspace(overlayIndex); // Removed as it was redundant
         });
     }
 
@@ -198,27 +198,6 @@ export default class WorkspaceOverlayExtension extends Extension {
             
             // Clean up tracking
             this._activeOverlayWorkspaces.delete(sourceWorkspaceIndex);
-        }
-    }
-    
-    /**
-     * Refresh an overlay workspace's windows on the current workspace
-     * @param {number} overlayWorkspaceIndex - The index of the overlay workspace
-     */
-    _refreshOverlayWorkspace(overlayWorkspaceIndex) {
-        log(`Refreshing overlay windows from workspace ${overlayWorkspaceIndex} on current workspace ${this._currentWorkspaceIndex}`);
-        
-        // Get the workspace entry
-        if (overlayWorkspaceIndex < this._workspaces.length) {
-            const workspaceEntry = this._workspaces[overlayWorkspaceIndex];
-            
-            // Get windows from the overlay
-            const overlayWindows = workspaceEntry.overlayWindows || [];
-            
-            // Since windows are set to appear on all workspaces,
-            // we don't need to do additional manipulation when refreshing
-            // Just log the windows for debugging
-            log(`${overlayWindows.length} overlay windows currently visible`);
         }
     }
 
