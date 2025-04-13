@@ -8,6 +8,12 @@ Workspace Overlay allows you to temporarily make all windows from a specific *so
 
 You can even overlay windows from multiple source workspaces at the same time!
 
+## Example Usage
+
+Imagine this scenario: You have multiple screens and primarily work across two main workspaces, utilizing all your screens.
+
+However, you also have two messenger applications, arranged side-by-side, on Workspace 3. While working on your main workspaces, you want to quickly check your messages. By pressing a configured shortcut, like `<Shift><Super>3`, the windows from Workspace 3 instantly appear as an overlay on your current workspace. Pressing `<Shift><Super>3` again hides the messenger windows, returning them visually to Workspace 3.
+
 ## Features
 
 *   **Toggle Workspace Overlay:** Use a keyboard shortcut (configurable) to show/hide windows from a specific workspace across all others.
