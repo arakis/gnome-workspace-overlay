@@ -5,13 +5,25 @@ import Shell from 'gi://Shell';
 
 export default class WorkspaceOverlayExtension extends Extension {
     enable() {
+        this._workspaceHandlerId = global.workspace_manager.connect(
+            'workspace-switched',
+            this._onWorkspaceSwitched.bind(this)
+        );
         this._keyBindingSettings();
         log('Workspace Overlay extension enabled');
     }
 
     disable() {
+        if (this._workspaceHandlerId) {
+            global.workspace_manager.disconnect(this._workspaceHandlerId);
+            this._workspaceHandlerId = null;
+        }
         this._removeKeybindings();
         log('Workspace Overlay extension disabled');
+    }
+
+    _onWorkspaceSwitched(workspaceManager, from, to, direction) {
+        log(`Workspace switched from index ${from} to index ${to}`);
     }
 
     _keyBindingSettings() {
