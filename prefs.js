@@ -164,19 +164,19 @@ export default class WorkspaceOverlayPreferences extends ExtensionPreferences {
             }
 
             // Ignore standalone modifier key presses
-            if ([Gdk.KEY_Control_L, Gdk.KEY_Control_R, 
-                 Gdk.KEY_Shift_L, Gdk.KEY_Shift_R, 
-                 Gdk.KEY_Alt_L, Gdk.KEY_Alt_R, 
-                 Gdk.KEY_Super_L, Gdk.KEY_Super_R].includes(keyval)) {
+            if ([Gdk.KEY_Control_L, Gdk.KEY_Control_R,
+            Gdk.KEY_Shift_L, Gdk.KEY_Shift_R,
+            Gdk.KEY_Alt_L, Gdk.KEY_Alt_R,
+            Gdk.KEY_Super_L, Gdk.KEY_Super_R].includes(keyval)) {
                 log('Standalone modifier key pressed, ignoring.');
                 return Gdk.EVENT_PROPAGATE;
             }
 
             // Filter out irrelevant modifiers for accelerator generation
             const relevantModifiers = state & (
-                Gdk.ModifierType.CONTROL_MASK | 
-                Gdk.ModifierType.SHIFT_MASK | 
-                Gdk.ModifierType.ALT_MASK | 
+                Gdk.ModifierType.CONTROL_MASK |
+                Gdk.ModifierType.SHIFT_MASK |
+                Gdk.ModifierType.ALT_MASK |
                 Gdk.ModifierType.SUPER_MASK
             );
 
